@@ -43,6 +43,8 @@ section[data-testid="stSidebar"] { display: none !important; }
 }
 
 /* Tombol jawaban kuis */
+.quiz-opt { margin: 0 !important; padding: 0 !important; }
+.quiz-opt .stButton { margin: 0 !important; padding: 0 !important; }
 .quiz-opt .stButton > button {
     background-color: #2f3542 !important;
     color: white !important;
@@ -51,8 +53,11 @@ section[data-testid="stSidebar"] { display: none !important; }
     width: 100% !important;
     text-align: center !important;
     margin: 2px 0 !important;
+    border-radius: 3px !important;
 }
 .quiz-opt .stButton > button:hover { background-color: #485460 !important; }
+/* Hapus gap default streamlit di kuis */
+div[data-testid="stVerticalBlock"] > div { gap: 0 !important; }
 
 /* Tombol sidebar ensiklopedia */
 .enc-btn .stButton > button {
@@ -311,6 +316,12 @@ def page_result():
         """, unsafe_allow_html=True)
         return
 
+    feature_names = ['ai','data','cyber','uiux','frontend','backend','mobile','game','devops','dba']
+    df_input = pd.DataFrame([st.session_state.answers], columns=feature_names)
+    probs = model.predict_proba(df_input)[0]
+    result = model.classes_[np.argmax(probs)]
+    st.session_state.result = result
+
     st.markdown(f"""
     <p style="color:#0fbcf9;font-size:1.6rem;font-weight:900;text-align:center;
        letter-spacing:3px;font-family:Arial,sans-serif;margin:20px 0 10px 0;">
@@ -340,6 +351,7 @@ def page_result():
         if st.button("🔄 Ulangi Kuis", key="retake", use_container_width=True):
             st.session_state.update({'q_index':0,'answers':[],'result':None,'page':'quiz'}); st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ==========================================
 # SWAP
@@ -396,7 +408,6 @@ def page_encyclopedia():
         st.session_state.page = 'home'; st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
     col_list, col_detail = st.columns([1, 3])
 
     with col_list:
