@@ -61,7 +61,7 @@ pip install -r requirements.txt
 
 ### 3. Download Model InsightFace (wajib)
 File `inswapper_128.onnx` (528 MB) tidak disertakan di repo karena ukurannya besar.
-Download di: [InsightFace Model Zoo](https://github.com/deepinsight/insightface/tree/master/model_zoo)
+Download disini: (https://drive.google.com/drive/folders/1kix2Ul3HM1AF1zyUS5Hm5ZOxuAZB-FKV?usp=sharing)
 
 Letakkan file tersebut langsung di folder root project:
 ```
