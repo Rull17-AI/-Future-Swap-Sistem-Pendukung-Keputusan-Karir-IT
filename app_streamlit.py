@@ -283,21 +283,24 @@ def page_quiz():
                 st.markdown('<div class="quiz-opt">', unsafe_allow_html=True)
                 if st.button(label, key=f"a_{idx}_{value}", use_container_width=True):
                     st.session_state.answers.append(value)
-                    st.session_state.q_index += 1; st.rerun()
+                    st.session_state.q_index += 1
+                    if st.session_state.q_index >= len(LIST_PERTANYAAN):
+                        st.session_state.page = 'result'
+                    st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        page_result()
+    
 
 # ==========================================
 # HASIL
 # ==========================================
 def page_result():
+    st.markdown('<div style="background:#3c40c6;height:8px;width:100%;margin-bottom:5px;"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="back-btn">', unsafe_allow_html=True)
+    if st.button("⬅ Kembali", key="bk_r"):
+        st.session_state.page = 'home'; st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
     if model is None:
-        st.markdown('<div style="background:#3c40c6;height:8px;width:100%;margin-bottom:5px;"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="back-btn">', unsafe_allow_html=True)
-        if st.button("⬅ Kembali", key="bk_r_err"):
-            st.session_state.page = 'home'; st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("""
         <div style="background:#c0392b;padding:20px;margin:20px;border-radius:6px;text-align:center;">
             <p style="color:white;font-size:1rem;margin:0;">
@@ -307,18 +310,6 @@ def page_result():
         </div>
         """, unsafe_allow_html=True)
         return
-
-    feature_names = ['ai','data','cyber','uiux','frontend','backend','mobile','game','devops','dba']
-    df_input = pd.DataFrame([st.session_state.answers], columns=feature_names)
-    probs = model.predict_proba(df_input)[0]
-    result = model.classes_[np.argmax(probs)]
-    st.session_state.result = result
-
-    st.markdown('<div style="background:#3c40c6;height:8px;width:100%;margin-bottom:5px;"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="back-btn">', unsafe_allow_html=True)
-    if st.button("⬅ Kembali", key="bk_r"):
-        st.session_state.page = 'home'; st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown(f"""
     <p style="color:#0fbcf9;font-size:1.6rem;font-weight:900;text-align:center;
@@ -420,24 +411,25 @@ def page_encyclopedia():
     with col_detail:
         selected = st.session_state.enc_selected
         narrative = NARRATIVE_KARIR.get(selected, "")
-        tmpl_b64 = get_template_img(selected)
+        base = KEY_MAP.get(selected, "ai")
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        tmpl_path = os.path.join(script_dir, "templates", f"{base}.png")
 
-        img_html = ""
-        if tmpl_b64:
-            img_html = f"""
-            <div style="text-align:center;margin-bottom:15px;">
-                <img src="{tmpl_b64}"
-                     style="max-height:260px;max-width:100%;object-fit:cover;border-radius:4px;"/>
-            </div>
-            """
+        st.markdown('<div style="background:#2f3542;padding:20px;border:1px solid #485460;border-radius:4px;">', unsafe_allow_html=True)
 
+        # Gambar pakai st.image bawaan Streamlit
+        if os.path.exists(tmpl_path):
+            _, ci, _ = st.columns([1, 4, 1])
+            with ci:
+                st.image(tmpl_path, use_container_width=True)
+
+        # Narasi teks
         st.markdown(f"""
-        <div style="background:#2f3542;padding:20px;border:1px solid #485460;min-height:500px;border-radius:4px;">
-            {img_html}
-            <p style="color:white;font-size:0.95rem;line-height:1.8;font-family:Helvetica,Arial,sans-serif;
-               text-align:justify;margin:0;">{narrative}</p>
-        </div>
+        <p style="color:white;font-size:0.95rem;line-height:1.8;font-family:Helvetica,Arial,sans-serif;
+           text-align:justify;padding:10px 0;margin:0;">{narrative}</p>
         """, unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
 # TREN GAJI
@@ -497,6 +489,7 @@ def page_trends():
 page = st.session_state.page
 if   page == 'home':         page_home()
 elif page == 'quiz':         page_quiz()
+elif page == 'result':       page_result()
 elif page == 'swap':         page_swap()
 elif page == 'encyclopedia': page_encyclopedia()
 elif page == 'trends':       page_trends()
